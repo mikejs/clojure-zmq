@@ -19,8 +19,7 @@ The native libraries for `zmq` and `jzmq` must be compiled and installed accordi
 The `Zmq.jar` produced from building `jzmq` must be installed to your local
 Maven repository as follows:
 
-> mvn install:install-file -Dfile=src/Zmq.jar -DgroupId=org.zmq \
->         -DartifactId=jzmq -Dversion=2.0.6-SNAPSHOT -Dpackaging=jar
+> mvn install:install-file -Dfile=src/Zmq.jar -DgroupId=org.zmq -DartifactId=jzmq -Dversion=2.0.6-SNAPSHOT -Dpackaging=jar
 
 A Maven POM is provided allowing you to build clojure-zmq and install it into
 your local Maven repository.
