@@ -1,5 +1,5 @@
 (ns 
-  org.zmq.examples.rpc
+  org.zmq.clojure-zmq.examples.rpc
    (:use [org.zmq.clojure-zmq :as zmq]))
    
 (defn- string-to-bytes [s] (.getBytes s))
@@ -10,7 +10,7 @@
 (defn handle [socket query] 
     (let [query_ (bytes-to-string query)
           resultset (str "Received query: " query_)]
-      (zmq/send-message socket (string-to-bytes resultset))))
+      (zmq/send- socket (string-to-bytes resultset))))
 
 (defn- on-thread [f]
   (doto (Thread. #^Runnable f) 
@@ -18,23 +18,23 @@
 
 (defn start-server []
   (let [ctx (zmq/make-context 1 1)
-        socket (zmq/make-socket ctx zmq/+rep+)]
+        socket (zmq/make-socket ctx zmq/REP)]
     
     ; Create separate 'dispatcher' thread
     (on-thread 
        #(do 
            (zmq/bind socket "tcp://lo:5555")
-           (while 1
-             (let [query (zmq/recv-message socket)]
+           (while true
+             (let [query (zmq/recv socket)]
                (handle socket query)))))))
 
 
-(defn -main [] 
+(defn send-to-server [query] 
   (let [ctx (zmq/make-context 1 1)
-        socket (zmq/make-socket ctx zmq/+req+)]
+        socket (zmq/make-socket ctx zmq/REQ)]
     (do
       (zmq/connect socket "tcp://localhost:5555")
-      (zmq/send-message socket (string-to-bytes "Hello World!"))
-      (println (str "Received response: " (bytes-to-string (recv socket)))))))
+      (zmq/send- socket (string-to-bytes query))
+      (println (str "Received response: " (bytes-to-string (zmq/recv socket)))))))
 
 
