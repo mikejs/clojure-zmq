@@ -1,12 +1,17 @@
-; License
-;
+;   Copyright (c) Joe Holloway. All rights reserved.
+;   The use and distribution terms for this software are covered by the
+;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;   which can be found in the file epl-v10.html at the root of this distribution.
+;   By using this software in any fashion, you are agreeing to be bound by
+;   the terms of this license.
+;   You must not remove this notice, or any other, from this software.
 
 (ns 
   org.zmq.clojure-zmq
   (:import [org.zmq Context Socket Poller]))
 
 ; Constants
-(def *noblock* 1)
+(def NOBLOCK 1)
 
 (def P2P 0)
 (def PUB 1)
@@ -30,6 +35,10 @@
 (def MCAST_LOOP 10)
 (def SNDBUF 11)
 (def RCVBUF 12)
+
+(def POLLIN 1)
+(def POLLOUT 2)
+(def POLLERR 4)
 
 ; Context
 (defn make-context 
@@ -73,15 +82,23 @@
 (defn make-poller [context size]
   (Poller. context size))
 
-(defn register [poller socket] ())
+(defn register [poller socket] 
+  (.register poller socket))
 
-(defn poll [poller] ())
+(defn poll [poller]
+  (.poll poller))
 
-(defn poll-in [poller index] ())
-(defn poll-out [poller index] ())
-(defn poll-error [poller index] ())
+(defn poll-in [poller idx]
+  (.pollin poller idx))
 
-(defn destroy-poller [poller] ())
+(defn poll-out [poller idx]
+  (.pollout poller idx))
+
+(defn poll-error [poller idx]
+  (.pollerr poller idx))
+
+(defn destroy-poller [poller]
+  (.destroy poller))
                                         
 
 

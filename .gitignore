@@ -1,4 +1,12 @@
+*.class
+*~
+*.tmp
+*.pyc
+*.swp
+*.egg-info
 target
-.class
-.swp
+build
+dist
+ez_setup
+
 
