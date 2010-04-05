@@ -18,7 +18,7 @@
 
 (defn start-server []
   (let [ctx (zmq/make-context 1 1)
-        socket (zmq/make-socket ctx zmq/REP)]
+        socket (zmq/make-socket ctx zmq/+rep+)]
     
     ; Create separate 'dispatcher' thread
     (on-thread 
@@ -30,11 +30,10 @@
 
 
 (defn send-to-server [query] 
-  (let [ctx (zmq/make-context 1 1)
-        socket (zmq/make-socket ctx zmq/REQ)]
-    (do
-      (zmq/connect socket "tcp://localhost:5555")
-      (zmq/send- socket (string-to-bytes query))
-      (println (str "Received response: " (bytes-to-string (zmq/recv socket)))))))
+  (zmq/with-context [ctx 1 1 0]
+      (zmq/with-socket [socket ctx zmq/+pub+]
+        (zmq/connect socket "tcp://localhost:5555")
+        (zmq/send- socket (string-to-bytes query))
+        (println (str "Received response: " (bytes-to-string (zmq/recv socket)))))))
 
 

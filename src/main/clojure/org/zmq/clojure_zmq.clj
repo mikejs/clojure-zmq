@@ -11,48 +11,52 @@
   (:import [org.zmq Context Socket Poller]))
 
 ; Constants
-(def NOBLOCK 1)
+(def +noblock+ 1)
 
-(def P2P 0)
-(def PUB 1)
-(def SUB 2)
-(def REQ 3)
-(def REP 4)
-(def XREQ 5)
-(def XREP 6)
-(def UPSTREAM 7)
-(def DOWNSTREAM 8)
+(def +p2p+ 0)
+(def +pub+ 1)
+(def +sub+ 2)
+(def +req+ 3)
+(def +rep+ 4)
+(def +xreq+ 5)
+(def +xrep+ 6)
+(def +upstream+ 7)
+(def +downstream+ 8)
 
-(def HWM 1)
-(def LWM 2)
-(def SWAP 3)
-(def AFFINITY 4)
-(def IDENTITY 5)
-(def SUBSCRIBE 6)
-(def UNSUBSCRIBE 7)
-(def RATE 8)
-(def RECOVERY_IVL 9)
-(def MCAST_LOOP 10)
-(def SNDBUF 11)
-(def RCVBUF 12)
+(def +hwm+ 1)
+(def +lwm+ 2)
+(def +swap+ 3)
+(def +affinity+ 4)
+(def +identity+ 5)
+(def +subscribe+ 6)
+(def +unsubscribe+ 7)
+(def +rate+ 8)
+(def +recovery-ivl+ 9)
+(def +mcast-loop+ 10)
+(def +sndbuf+ 11)
+(def +rcvbuf+ 12)
 
-(def POLLIN 1)
-(def POLLOUT 2)
-(def POLLERR 4)
+(def +pollin+ 1)
+(def +pollout+ 2)
+(def +pollerr+ 4)
 
 ; Context
-(defn make-context 
-  ([app-threads io-threads flags] 
-    (Context. app-threads io-threads flags))
-  ([app-threads io-threads] 
-    (make-context app-threads io-threads 0)))
 
-(defn destroy-context [context] 
-  (.destroy context))
+(defn make-context [app-threads io-threads & flags] 
+    (org.zmq.ContextProxy. app-threads io-threads (if (nil? flags) 0 flags)))
+
+(defmacro with-context [name- app-threads io-threads & stuff]
+  (let [[flags & body] stuff]
+    `(let [~name- (make-context ~app-threads ~io-threads ~flags)]
+       ~@body)))
 
 ; Socket
 (defn make-socket [context socket-type]
-  (Socket. context socket-type))
+  (org.zmq.SocketProxy. context socket-type))
+
+(defmacro with-socket [[name- ctx socket-type] & body]
+    `(let [~name- (make-socket ~ctx ~socket-type)]
+       ~@body))
 
 (defn set-socket-option [socket option value] 
   (.setsockopt socket option value))
@@ -80,7 +84,7 @@
 
 ; Poller
 (defn make-poller [context size]
-  (Poller. context size))
+  (org.zmq.PollerProxy. context size))
 
 (defn register [poller socket] 
   (.register poller socket))
@@ -88,13 +92,13 @@
 (defn poll [poller]
   (.poll poller))
 
-(defn poll-in [poller idx]
+(defn pollin [poller idx]
   (.pollin poller idx))
 
-(defn poll-out [poller idx]
+(defn pollout [poller idx]
   (.pollout poller idx))
 
-(defn poll-error [poller idx]
+(defn pollerr [poller idx]
   (.pollerr poller idx))
 
 (defn destroy-poller [poller]

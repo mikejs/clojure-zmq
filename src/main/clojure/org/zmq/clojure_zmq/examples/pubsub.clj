@@ -14,19 +14,19 @@
 
 (defn start-subscriber [id]
   (let [ctx (zmq/make-context 1 1)
-        socket (zmq/make-socket ctx zmq/SUB)]
+        socket (zmq/make-socket ctx zmq/+sub+)]
     
     ; Create on separate thread so we can interact with REPL
     (on-thread 
        #(do 
-           (zmq/set-socket-option socket zmq/SUBSCRIBE "") 
+           (zmq/set-socket-option socket zmq/+subscribe+ "") 
            (zmq/connect socket "tcp://localhost:5555")
            (while true
              (let [msg (zmq/recv socket)]
                (handle socket id msg)))))))
 
 (def publish-ctx (zmq/make-context 1 1))
-(def publish-socket (zmq/make-socket publish-ctx zmq/PUB))
+(def publish-socket (zmq/make-socket publish-ctx zmq/+pub+))
 
 (do (zmq/bind publish-socket "tcp://lo:5555"))
 
