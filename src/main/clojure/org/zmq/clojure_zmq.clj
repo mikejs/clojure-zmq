@@ -40,23 +40,44 @@
 (def +pollout+ 2)
 (def +pollerr+ 4)
 
+;
 ; Context
+;
 (defn make-context [app-threads io-threads & [flags]] 
     (Context. app-threads io-threads (if (nil? flags) 0 flags)))
 
-(defmacro with-context [[name- app-threads io-threads & flags] & body]
+(defmacro with-context 
+  "Constructs a 0MQ context with the given `name` and evaluates the exprs with
+  that context in the lexical scope.  The exprs are contained in an implicit
+  `do`.  The context is finally destroyed.
+  
+  (with-context [ctx 1 1 0] ... )
+  "
+  [[name- app-threads io-threads & flags] & body]
   `(let [~name- (make-context ~app-threads ~io-threads ~@flags)]
+     (try
        ~@body
-     (.destroy ~name-)))
+       (finally (.destroy ~name-)))))
 
+;
 ; Socket
+;
 (defn make-socket [context socket-type]
   (Socket. context socket-type))
 
-(defmacro with-socket [[name- ctx socket-type] & body]
-  `(let [~name- (make-socket ~ctx ~socket-type)]
+(defmacro with-socket
+  "Constructs a 0MQ socket with the given `name` and `context`.  The exprs are
+  evaluated with that socket in the lexical scope.  The exprs are contained in
+  an implicit `do`.  The socket is finally destroyed.
+
+  (with-socket [sock ctx +req+] ... )
+  (with-socket [sock ctx +pub+] ... )
+  "
+  [[name- context socket-type] & body]
+  `(let [~name- (make-socket ~context ~socket-type)]
+     (try
        ~@body
-     (.destroy ~name-)))
+       (finally (.destroy ~name-)))))
 
 (defn set-socket-option [socket option value] 
   (.setsockopt socket option value))
@@ -82,7 +103,9 @@
 (defn destroy-socket [socket]
   (.destroy socket))
 
+;
 ; Poller
+;
 (defn make-poller [context size]
   (Poller. context size))
 

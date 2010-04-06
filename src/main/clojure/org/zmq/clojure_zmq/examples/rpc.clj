@@ -5,12 +5,10 @@
 (defn- string-to-bytes [s] (.getBytes s))
 (defn- bytes-to-string [b] (String. b))
 
-(def request-handler (agent 0))
-
 (defn handle [socket query] 
-    (let [query_ (bytes-to-string query)
-          resultset (str "Received query: " query_)]
-      (zmq/send- socket (string-to-bytes resultset))))
+  (let [query_ (bytes-to-string query)
+        resultset (str "Received query: " query_)]
+    (zmq/send- socket (string-to-bytes resultset))))
 
 (defn- on-thread [f]
   (doto (Thread. #^Runnable f) 
@@ -28,13 +26,11 @@
              (let [query (zmq/recv socket)]
                (handle socket query)))))))
 
-
 (defn send-to-server [query] 
-  (zmq/with-context [ctx 1 1 0]
-      (zmq/with-socket [socket ctx zmq/+req+]
-        (zmq/connect socket "tcp://localhost:5555")
-        (zmq/send- socket (string-to-bytes query))
-        (println (str "Received response: " (bytes-to-string (zmq/recv socket))))
-     )))
+  (zmq/with-context [ctx 1 1]
+    (zmq/with-socket [socket ctx zmq/+req+]
+      (zmq/connect socket "tcp://localhost:5555")
+      (zmq/send- socket (string-to-bytes query))
+      (println (str "Received response: " (bytes-to-string (zmq/recv socket)))))))
 
 
