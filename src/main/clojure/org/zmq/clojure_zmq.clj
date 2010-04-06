@@ -41,22 +41,22 @@
 (def +pollerr+ 4)
 
 ; Context
+(defn make-context [app-threads io-threads & [flags]] 
+    (Context. app-threads io-threads (if (nil? flags) 0 flags)))
 
-(defn make-context [app-threads io-threads & flags] 
-    (org.zmq.ContextProxy. app-threads io-threads (if (nil? flags) 0 flags)))
-
-(defmacro with-context [name- app-threads io-threads & stuff]
-  (let [[flags & body] stuff]
-    `(let [~name- (make-context ~app-threads ~io-threads ~flags)]
-       ~@body)))
+(defmacro with-context [[name- app-threads io-threads & flags] & body]
+  `(let [~name- (make-context ~app-threads ~io-threads ~@flags)]
+       ~@body
+     (.destroy ~name-)))
 
 ; Socket
 (defn make-socket [context socket-type]
-  (org.zmq.SocketProxy. context socket-type))
+  (Socket. context socket-type))
 
 (defmacro with-socket [[name- ctx socket-type] & body]
-    `(let [~name- (make-socket ~ctx ~socket-type)]
-       ~@body))
+  `(let [~name- (make-socket ~ctx ~socket-type)]
+       ~@body
+     (.destroy ~name-)))
 
 (defn set-socket-option [socket option value] 
   (.setsockopt socket option value))
@@ -84,7 +84,7 @@
 
 ; Poller
 (defn make-poller [context size]
-  (org.zmq.PollerProxy. context size))
+  (Poller. context size))
 
 (defn register [poller socket] 
   (.register poller socket))

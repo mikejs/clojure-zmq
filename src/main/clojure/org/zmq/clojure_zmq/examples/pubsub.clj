@@ -25,12 +25,12 @@
              (let [msg (zmq/recv socket)]
                (handle socket id msg)))))))
 
-(def publish-ctx (zmq/make-context 1 1))
-(def publish-socket (zmq/make-socket publish-ctx zmq/+pub+))
-
-(do (zmq/bind publish-socket "tcp://lo:5555"))
-
-(defn publish [msg] 
-  (zmq/send- publish-socket (string-to-bytes msg)))
+;(def publish-ctx (zmq/make-context 1 1))
+;(def publish-socket (zmq/make-socket publish-ctx zmq/+pub+))
+;
+;(do (zmq/bind publish-socket "tcp://lo:5555"))
+;
+;(defn publish [msg] 
+;  (zmq/send- publish-socket (string-to-bytes msg)))
 
 

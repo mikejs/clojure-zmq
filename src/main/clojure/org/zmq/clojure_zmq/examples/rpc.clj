@@ -31,9 +31,10 @@
 
 (defn send-to-server [query] 
   (zmq/with-context [ctx 1 1 0]
-      (zmq/with-socket [socket ctx zmq/+pub+]
+      (zmq/with-socket [socket ctx zmq/+req+]
         (zmq/connect socket "tcp://localhost:5555")
         (zmq/send- socket (string-to-bytes query))
-        (println (str "Received response: " (bytes-to-string (zmq/recv socket)))))))
+        (println (str "Received response: " (bytes-to-string (zmq/recv socket))))
+     )))
 
 
