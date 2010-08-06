@@ -1,6 +1,6 @@
 (ns 
-  org.zmq.clojure-zmq.examples.rpc
-   (:use [org.zmq.clojure-zmq :as zmq]))
+  org.zeromq.clojure.examples.rpc
+   (:use [org.zeromq.clojure :as zmq]))
    
 (defn- string-to-bytes [s] (.getBytes s))
 (defn- bytes-to-string [b] (String. b))
@@ -26,11 +26,11 @@
              (let [query (zmq/recv socket)]
                (handle socket query)))))))
 
-(defn send-to-server [query] 
-  (zmq/with-context [ctx 1 1]
-    (zmq/with-socket [socket ctx zmq/+req+]
-      (zmq/connect socket "tcp://localhost:5555")
-      (zmq/send- socket (string-to-bytes query))
-      (println (str "Received response: " (bytes-to-string (zmq/recv socket)))))))
+(defn send-to-server [query]
+  (let [ctx (zmq/make-context 1)
+        socket (zmq/make-socket ctx zmq/+req+)]
+    (zmq/connect socket "tcp://localhost:5555")
+    (zmq/send- socket (string-to-bytes query))
+    (println (str "Received response: " (bytes-to-string (zmq/recv socket))))))
 
 

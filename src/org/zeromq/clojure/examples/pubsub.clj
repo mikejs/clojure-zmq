@@ -1,6 +1,6 @@
 (ns 
-  org.zmq.clojure-zmq.examples.pubsub
-   (:use [org.zmq.clojure-zmq :as zmq]))
+  org.zeromq.clojure.examples.pubsub
+   (:use [org.zeromq.clojure :as zmq]))
    
 (defn- string-to-bytes [s] (.getBytes s))
 (defn- bytes-to-string [b] (String. b))
@@ -25,11 +25,10 @@
   ; Create subscriber on separate thread so we can interact with REPL when it
   ; blocks.
   (on-thread 
-     #(with-context [ctx 1 1]
-        (with-socket [socket ctx zmq/+sub+]
-          (zmq/set-socket-option socket zmq/+subscribe+ "") 
-          (zmq/connect socket "tcp://localhost:5555")
-          (while true
-            (let [msg (zmq/recv socket)]
-              (handle socket id msg)))))))
-
+   #((let [ctx (zmq/make-context 1)
+           socket (zmq/make-socket ctx zmq/+sub+)]           
+       (zmq/set-socket-option socket zmq/+subscribe+ "") 
+       (zmq/connect socket "tcp://localhost:5555")
+       (while true
+         (let [msg (zmq/recv socket)]
+           (handle socket id msg)))))))

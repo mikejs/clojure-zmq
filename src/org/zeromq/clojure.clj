@@ -6,9 +6,9 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(ns 
-  org.zmq.clojure-zmq
-  (:import [org.zmq Context Socket Poller]))
+(ns
+  org.zeromq.clojure
+  (:import (org.zeromq ZMQ)))
 
 ; Constants
 (def +noblock+ 1)
@@ -43,49 +43,22 @@
 ;
 ; Context
 ;
-(defn make-context [app-threads io-threads & [flags]] 
-    (Context. app-threads io-threads (if (nil? flags) 0 flags)))
-
-(defmacro with-context 
-  "Constructs a 0MQ context with the given `name` and evaluates the exprs with
-  that context in the lexical scope.  The exprs are contained in an implicit
-  `do`.  The context is finally destroyed.
-  
-  (with-context [ctx 1 1 0] ... )
-  "
-  [[name- app-threads io-threads & flags] & body]
-  `(let [~name- (make-context ~app-threads ~io-threads ~@flags)]
-     (try
-       ~@body
-       (finally (.destroy ~name-)))))
+(defn make-context [io-threads]
+  (ZMQ/context io-threads))
 
 ;
 ; Socket
 ;
 (defn make-socket [context socket-type]
-  (Socket. context socket-type))
+  (.socket context socket-type))
 
-(defmacro with-socket
-  "Constructs a 0MQ socket with the given `name` and `context`.  The exprs are
-  evaluated with that socket in the lexical scope.  The exprs are contained in
-  an implicit `do`.  The socket is finally destroyed.
-
-  (with-socket [sock ctx +req+] ... )
-  (with-socket [sock ctx +pub+] ... )
-  "
-  [[name- context socket-type] & body]
-  `(let [~name- (make-socket ~context ~socket-type)]
-     (try
-       ~@body
-       (finally (.destroy ~name-)))))
-
-(defn set-socket-option [socket option value] 
+(defn set-socket-option [socket option value]
   (.setsockopt socket option value))
 
 (defn bind [socket address]
   (.bind socket address))
 
-(defn connect [socket address] 
+(defn connect [socket address]
   (.connect socket address))
 
 (defn send-
@@ -107,9 +80,9 @@
 ; Poller
 ;
 (defn make-poller [context size]
-  (Poller. context size))
+  (.poller context size))
 
-(defn register [poller socket] 
+(defn register [poller socket]
   (.register poller socket))
 
 (defn poll [poller]
@@ -126,6 +99,6 @@
 
 (defn destroy-poller [poller]
   (.destroy poller))
-                                        
+
 
 
